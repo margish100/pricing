@@ -18,7 +18,6 @@ from django.template.loader import get_template
 import os
 
 
-#Anonymous required
 def anonymous_required(function=None, redirect_url=None):
 
    if not redirect_url:
@@ -221,11 +220,11 @@ def viewPDFInvoice(request, slug):
         messages.error(request, 'Something went wrong')
         return redirect('invoices')
 
-    #fetch all the products - related to this invoice
+
     products = Product.objects.filter(invoice=invoice)
 
     #Get Client Settings
-    p_settings = Settings.objects.get(clientName='Skolo Online Learning')
+    p_settings = Settings.objects.get(clientName='margish')
 
     #Calculate the Invoice Total
     invoiceCurrency = ''
@@ -250,7 +249,7 @@ def viewPDFInvoice(request, slug):
 
 
 def viewDocumentInvoice(request, slug):
-    #fetch that invoice
+
     try:
         invoice = Invoice.objects.get(slug=slug)
         pass
@@ -258,11 +257,11 @@ def viewDocumentInvoice(request, slug):
         messages.error(request, 'Something went wrong')
         return redirect('invoices')
 
-    #fetch all the products - related to this invoice
+
     products = Product.objects.filter(invoice=invoice)
 
-    #Get Client Settings
-    p_settings = Settings.objects.get(clientName='Skolo Online Learning')
+
+    p_settings = Settings.objects.get(clientName='margish')
 
     #Calculate the Invoice Total
     invoiceTotal = 0.0
@@ -279,39 +278,34 @@ def viewDocumentInvoice(request, slug):
     context['p_settings'] = p_settings
     context['invoiceTotal'] = "{:.2f}".format(invoiceTotal)
 
-    #The name of your PDF file
+
     filename = '{}.pdf'.format(invoice.uniqueId)
 
     #HTML FIle to be converted to PDF - inside your Django directory
     template = get_template('invoice/pdf-template.html')
 
-
-    #Render the HTML
     html = template.render(context)
 
-    #Options - Very Important [Don't forget this]
     options = {
           'encoding': 'UTF-8',
-          'javascript-delay':'10', #Optional
-          'enable-local-file-access': None, #To be able to access CSS
+          'javascript-delay':'10',
+          'enable-local-file-access': None,
           'page-size': 'A4',
           'custom-header' : [
               ('Accept-Encoding', 'gzip')
           ],
       }
-      #Javascript delay is optional
 
-    #Remember that location to wkhtmltopdf
     config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
 
-    #IF you have CSS to add to template
+
     css1 = os.path.join(settings.CSS_LOCATION, 'assets', 'css', 'bootstrap.min.css')
     css2 = os.path.join(settings.CSS_LOCATION, 'assets', 'css', 'dashboard.css')
 
-    #Create the file
+
     file_content = pdfkit.from_string(html, False, configuration=config, options=options)
 
-    #Create the HTTP Response
+
     response = HttpResponse(file_content, content_type='application/pdf')
     response['Content-Disposition'] = 'inline; filename = {}'.format(filename)
 
@@ -320,7 +314,7 @@ def viewDocumentInvoice(request, slug):
 
 
 def emailDocumentInvoice(request, slug):
-    #fetch that invoice
+
     try:
         invoice = Invoice.objects.get(slug=slug)
         pass
@@ -328,11 +322,11 @@ def emailDocumentInvoice(request, slug):
         messages.error(request, 'Something went wrong')
         return redirect('invoices')
 
-    #fetch all the products - related to this invoice
+
     products = Product.objects.filter(invoice=invoice)
 
-    #Get Client Settings
-    p_settings = Settings.objects.get(clientName='Skolo Online Learning')
+
+    p_settings = Settings.objects.get(clientName='margish')
 
     #Calculate the Invoice Total
     invoiceTotal = 0.0
@@ -349,17 +343,17 @@ def emailDocumentInvoice(request, slug):
     context['p_settings'] = p_settings
     context['invoiceTotal'] = "{:.2f}".format(invoiceTotal)
 
-    #The name of your PDF file
+
     filename = '{}.pdf'.format(invoice.uniqueId)
 
-    #HTML FIle to be converted to PDF - inside your Django directory
+
     template = get_template('invoice/pdf-template.html')
 
 
-    #Render the HTML
+
     html = template.render(context)
 
-    #Options - Very Important [Don't forget this]
+
     options = {
           'encoding': 'UTF-8',
           'javascript-delay':'1000', #Optional
@@ -369,20 +363,19 @@ def emailDocumentInvoice(request, slug):
               ('Accept-Encoding', 'gzip')
           ],
       }
-      #Javascript delay is optional
 
-    #Remember that location to wkhtmltopdf
+
     config = pdfkit.configuration(wkhtmltopdf='/usr/bin/wkhtmltopdf')
 
-    #Saving the File
+
     filepath = os.path.join(settings.MEDIA_ROOT, 'client_invoices')
     os.makedirs(filepath, exist_ok=True)
     pdf_save_path = filepath+filename
-    #Save the PDF
+
     pdfkit.from_string(html, pdf_save_path, configuration=config, options=options)
 
 
-    #send the emails to client
+
     to_email = invoice.client.emailAddress
     from_client = p_settings.clientName
     emailInvoiceClient(to_email, from_client, pdf_save_path)
@@ -390,7 +383,7 @@ def emailDocumentInvoice(request, slug):
     invoice.status = 'EMAIL_SENT'
     invoice.save()
 
-    #Email was send, redirect back to view - invoice
+
     messages.success(request, "Email sent to the client succesfully")
     return redirect('create-build-invoice', slug=slug)
 

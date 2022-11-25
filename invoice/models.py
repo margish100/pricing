@@ -119,10 +119,10 @@ class Product(models.Model):
     price = models.FloatField(null=True, blank=True)
     currency = models.CharField(choices=CURRENCY, default='R', max_length=100)
 
-    #Related Fields
+
     invoice = models.ForeignKey(Invoice, blank=True, null=True, on_delete=models.CASCADE)
 
-    #Utility fields
+
     uniqueId = models.CharField(null=True, blank=True, max_length=100)
     slug = models.SlugField(max_length=500, unique=True, blank=True, null=True)
     date_created = models.DateTimeField(blank=True, null=True)

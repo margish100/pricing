@@ -4,7 +4,6 @@ from django.forms import widgets
 from .models import *
 import json
 
-#Form Layout from Crispy Forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column
 
